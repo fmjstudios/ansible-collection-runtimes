@@ -1,0 +1,106 @@
+; {{ ansible_managed }}
+; PHP-FPM pool configuration file
+
+[www]
+{% if php_fpm_pool_conf_general_prefix is defined %}
+prefix = {{ php_fpm_pool_conf_general_prefix }}
+{% else %}
+;prefix = /path/to/pools/$pool
+{% endif %}
+
+user = {{ php_fpm_pool_conf_general_user | default('www-data') }}
+group = {{ php_fpm_pool_conf_general_group | default('www-data') }}
+
+;;;;;;;;;;;;;;;;;;;
+; LISTENER CONFIG ;
+;;;;;;;;;;;;;;;;;;;
+
+listen = {{ php_fpm_pool_conf_listener_path | default('/run/php/php-fpm.sock') }}
+listen.owner = {{ php_fpm_pool_conf_listener_owner | default('www-data') }}
+listen.group = {{ php_fpm_pool_conf_listener_group | default('www-data') }}
+listen.mode = {{ php_fpm_pool_conf_listener_mode | default('0660') }}
+;listen.backlog = 511
+;listen.acl_users =
+;listen.acl_groups =
+;listen.allowed_clients = 127.0.0.1
+
+;;;;;;;;;;;;;;;;;;;
+; PROCESS CONFIG  ;
+;;;;;;;;;;;;;;;;;;;
+
+process.priority = {{ php_fpm_pool_conf_process_priority | default('-19') }}
+process.dumpable = {{ php_fpm_pool_conf_process_dumpable | default('no') }}
+
+pm = {{ php_fpm_pool_conf_process_manager_setting | default('dynamic') }}
+pm.max_children = {{ php_fpm_pool_conf_process_manager_max_children | default('5') }}
+pm.start_servers = {{ php_fpm_pool_conf_process_manager_start_servers | default('2') }}
+pm.min_spare_servers = {{ php_fpm_pool_conf_process_manager_min_spare_servers | default('1') }}
+pm.max_spare_servers = {{ php_fpm_pool_conf_process_manager_max_spare_servers | default('3') }}
+pm.max_spawn_rate = {{ php_fpm_pool_conf_process_manager_max_spawn_rate | default('32') }}
+pm.process_idle_timeout = {{ php_fpm_pool_conf_process_manager_process_idle_timeout | default('10s') }}
+pm.max_requests = {{ php_fpm_pool_conf_process_manager_max_requests | default('500') }}
+
+{% if php_fpm_pool_conf_process_manager_status_path != "" %}
+pm.status_path = {{ php_fpm_pool_conf_process_manager_status_path }}
+{% else %}
+;pm.status_path = /status
+{% endif %}
+{% if php_fpm_pool_conf_process_manager_status_listen != "" %}
+pm.status_listen = {{ php_fpm_pool_conf_process_manager_status_listen }}
+{% else %}
+;pm.status_listen = 127.0.0.1:9001
+{% endif %}
+
+;ping.path = /ping
+;ping.response = pong
+
+{% if php_fpm_pool_conf_access_log != "" %}
+access.log = {{ php_fpm_pool_conf_access_log }}
+{% else %}
+;access.log = '/var/log/php/$pool.access.log'
+{% endif %}
+;access.format = {{ php_fpm_pool_conf_access_log_format | default('%R - %u %t "%m %r%Q%q" %s %f %{milli}d %{kilo}M %C%%') }}
+
+
+;slowlog = log/$pool.log.slow
+
+;request_slowlog_timeout = 0
+;request_slowlog_trace_depth = 20
+;request_terminate_timeout = 0
+;request_terminate_timeout_track_finished = no
+
+;rlimit_files = 1024
+;rlimit_core = 0
+
+;chroot =
+;chdir = /var/www
+
+;catch_workers_output = yes
+;decorate_workers_output = no
+;clear_env = no
+;security.limit_extensions = .php .php3 .php4 .php5 .php7
+
+;;;;;;;;;;;;;;;;;;;
+;    PHP ADMIN    ;
+;;;;;;;;;;;;;;;;;;;
+
+; PHP flags
+{% if php_fpm_pool_conf_php_flags is defined and php_fpm_pool_conf_php_flags != {} %}
+  {% for key, value in php_fpm_pool_conf_php_flags.items() %}
+php_admin_value[{{ key }}] = {{ value }}
+  {% endfor %}
+{% endif %}
+
+; PHP admin flags
+{% if php_fpm_pool_conf_php_admin_flags is defined and php_fpm_pool_conf_php_admin_flags != {} %}
+  {% for key, value in php_fpm_pool_conf_php_admin_flags.items() %}
+php_admin_value[{{ key }}] = {{ value }}
+  {% endfor %}
+{% endif %}
+
+; PHP admin values
+{% if php_fpm_pool_conf_php_admin_values is defined and php_fpm_pool_conf_php_admin_values != {} %}
+  {% for key, value in php_fpm_pool_conf_php_admin_values.items() %}
+php_admin_value[{{ key }}] = {{ value }}
+  {% endfor %}
+{% endif %}

@@ -1,0 +1,7 @@
+---
+__php_fpm_conf_dir: "/etc/php/{{ php_fpm_version }}/fpm"
+__php_cli_conf_dir: "/etc/php/{{ php_fpm_version }}/cli"
+
+__php_fpm_log_dir: "/var/log/php"
+
+__php_fpm_systemd_service: "php{{ php_fpm_version }}-fpm"

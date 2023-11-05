@@ -1,0 +1,6 @@
+---
+__php_internal_dependencies:
+  - libapache2-mod-php
+  - libapache2-mod-xsendfile
+  - libapache2-mod-fcgid
+__php_repository_ppa: "ppa:ondrej/php"

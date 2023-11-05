@@ -1,0 +1,55 @@
+---
+ols_version: 1.7.16
+ols_repo: "https://repo.litespeed.sh"
+ols_package: openlitespeed
+ols_service_name: lsws
+ols_install_path: /usr/local/lsws
+
+ols_config_listen_addr: "0.0.0.0"
+ols_config_http_port: 80
+ols_config_https_port: 443
+ols_config_admin_emails:
+  []
+  # - maximilian.gindorfer@delta4x4.com
+ols_config_log_level: DEBUG
+ols_config_virtual_hosts:
+  # - domain: crank.delta4x4.net
+  #   root: /home/openlitespeed/webapps/crank.delta4x4.net
+  #   aliases:
+  #     - www.$VH_NAME
+  #   ssl_certificate: /etc/letsencrypt/certs/crank.delta4x4.net/cert.pem
+  #   ssl_key: /etc/letsencrypt/certs/crank.delta4x4.net/cert.key
+  #   user: openlitespeed
+  #   group: openlitespeed
+  #   admin_email: maximilian.gindorfer@delta4x4.net
+
+ols_php_version: "8.1"
+ols_php_dependencies:
+  []
+  # - mysql-client
+ols_php_extensions:
+  []
+  # - common
+  # - dbg
+  # - igbinary
+  # - imap
+  # - ioncube
+  # - memcached
+  # - msgpack
+  # - opcache
+  # - pgsql
+  # - redis
+  # - sqlite3
+  # - tidy
+  # - apcu
+  # - curl
+  # - dev
+  # - imagick
+  # - intl
+  # - ldap
+  # - mysql
+  # - pear
+  # - pspell
+  # - snmp
+  # - sybase
+  #  - modules-source

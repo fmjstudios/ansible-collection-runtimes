@@ -1,0 +1,44 @@
+---
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+    apply:
+      tags:
+        - php_fpm_install
+        - php_fpm_configure
+        - php_fpm_run
+  tags:
+    - php_fpm_install
+    - php_fpm_configure
+    - php_fpm_run
+
+- name: Install
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      become: true
+      tags:
+        - php_fpm_install
+  tags:
+    - php_fpm_install
+
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+    apply:
+      become: true
+      tags:
+        - php_fpm_configure
+  tags:
+    - php_fpm_configure
+
+- name: Ensure php_fpm service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: "{{ __php_fpm_systemd_service }}"
+    state: started
+    enabled: true
+
+- name: Flush handlers after run.
+  ansible.builtin.meta: flush_handlers

@@ -1,0 +1,44 @@
+---
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+    apply:
+      tags:
+        - openlitespeed_install
+        - openlitespeed_configure
+        - openlitespeed_run
+  tags:
+    - openlitespeed_install
+    - openlitespeed_configure
+    - openlitespeed_run
+
+- name: Install
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      become: true
+      tags:
+        - openlitespeed_install
+  tags:
+    - openlitespeed_install
+
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+    apply:
+      become: true
+      tags:
+        - openlitespeed_configure
+  tags:
+    - openlitespeed_configure
+
+- name: Ensure OpenLiteSpeed systemd service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: "{{ ols_service_name }}"
+    state: started
+    enabled: true
+
+- name: Flush handlers after run.
+  ansible.builtin.meta: flush_handlers

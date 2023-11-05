@@ -1,0 +1,9 @@
+---
+- name: Restart OpenLiteSpeed web server systemd service
+  listen: "restart lsws"
+  ansible.builtin.service:
+    name: "{{ ols_service_name }}"
+    daemon_reload: true
+    state: restarted
+  when:
+    - not ansible_check_mode | bool

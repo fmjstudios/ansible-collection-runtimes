@@ -1,0 +1,68 @@
+# {{ ansible_managed }}
+
+docRoot                 $VH_ROOT/html
+vhDomain                $VH_NAME
+{% if __host__.aliases is defined and __host__.aliases != [] %}
+vhAliases               {% for alias in __host__.aliases %}{{ alias }}{{ ", " if not loop.last else "" }}{% endfor %}
+{% endif %}
+
+adminEmails             {{ __host__.admin_email }}
+enableGzip              1
+enableIpGeo             1
+
+index  {
+    useServer           0
+    indexFiles          index.php, index.html, shopware.php
+}
+
+errorlog $VH_ROOT/log/$VH_NAME.error_log {
+    useServer           0
+    logLevel            ERROR
+    rollingSize         10M
+}
+
+accesslog $VH_ROOT/log/$VH_NAME.access_log {
+    useServer           0
+    logFormat           %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"
+    logHeaders          5
+    rollingSize         10M
+    keepDays            10
+    compressArchive     1
+}
+
+scripthandler  {
+    add                 lsapi:{{ __host__.user }} php
+}
+
+extprocessor {{ __host__.user }} {
+    type                lsapi
+    address             uds://tmp/lshttpd/lsphp.sock
+    maxConns            10
+    env                 LSAPI_CHILDREN=25
+    initTimeout         600
+    retryTimeout        0
+    persistConn         1
+    pcKeepAliveTimeout  1
+    respBuffer          0
+    autoStart           1
+    path                /usr/local/lsws/lsphp{{ ols_php_version.split('.') | join }}/bin/lsphp
+    extUser             {{ __host__.user }}
+    extGroup            {{ __host__.group }}
+    memSoftLimit        12288M
+    memHardLimit        12288M
+    procSoftLimit       400
+    procHardLimit       500
+}
+
+
+rewrite  {
+    enable              1
+    autoLoadHtaccess    1
+}
+
+{% if __host__.ssl_certificate != "" %}
+vhssl  {
+  keyFile               {{ __host__.ssl_certificate }}
+  certFile              {{ __host__.ssl_key }}
+}
+{% endif %}

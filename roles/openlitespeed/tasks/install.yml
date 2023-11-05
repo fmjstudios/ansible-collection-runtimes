@@ -1,0 +1,53 @@
+---
+- name: install | Check if the OpenLiteSpeed installation directory already exists
+  ansible.builtin.stat:
+    path: "{{ ols_install_path }}"
+  register: ols_check
+
+# - name: install | Exit the role if the installation is found to already be installed
+#   ansible.builtin.fail:
+#     msg: OpenLiteSpeed is already installation in {{ ols_install_path }}
+#   when:
+#     - ols_check.stat.exists
+
+- name: install | Add the OpenLiteSpeed repo to the machine's repository list
+  ansible.builtin.shell: |
+    set -o pipefail
+    wget -O - {{ ols_repo }} | bash
+    sleep 5
+  register: ols_cmd
+  changed_when:
+    - ols_cmd.rc != 0
+  when:
+    - not ols_check.stat.exists
+
+- name: install | Update packages caches and upgrade local packages
+  ansible.builtin.apt:
+    update_cache: true
+  when:
+    - not ols_check.stat.exists
+
+- name: install | Install the OpenLiteSpeed WebServer at the configured version
+  ansible.builtin.apt:
+    # name: "{{ ols_package }}-{{ ols_version }}" -> commented due to bug in OLS repositories
+    name: "{{ ols_package }}"
+    state: present
+  when:
+    # - not ols_check.stat.exists
+
+- name: install | Install LiteSpeed PHP at version "{{ ols_php_version }}"
+  ansible.builtin.apt:
+    name: "lsphp{{ ols_php_version.split('.') | join }}"
+    state: present
+  when:
+    # - not ols_check.stat.exists
+
+- name: install | Install LiteSpeed PHP extensions for version "{{ ols_php_version }}"
+  ansible.builtin.apt:
+    name: "lsphp{{ ols_php_version.split('.') | join }}-{{ __ext__ }}"
+    state: present
+  loop: "{{ ols_php_extensions }}"
+  loop_control:
+    loop_var: __ext__
+  when:
+    # - not ols_check.stat.exists

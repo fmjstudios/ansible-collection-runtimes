@@ -1,0 +1,19 @@
+---
+php:
+  version: 8.1
+  dependencies: []
+  service: php8.1-fpm
+  repositories:
+    ppa: []
+  packages: []
+  install_fpm: true
+
+php_memory_limit: 256M
+php_allow_url_fopen: "On"
+php_upload_max_filesize: 1M
+php_max_execution_time: 20
+php_date_timezone: Europe/Berlin
+
+enabled_extensions: []
+
+enabled_zend_extensions: []

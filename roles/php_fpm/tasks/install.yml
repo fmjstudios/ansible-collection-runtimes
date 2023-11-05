@@ -1,0 +1,12 @@
+---
+- name: install | Install PHP-FPM for the configured PHP version
+  ansible.builtin.apt:
+    name: "php{{ php_fpm_version }}-fpm"
+    state: present
+    install_recommends: true
+  notify:
+    - restart php_fpm
+
+- name: install | Update system package caches
+  ansible.builtin.apt:
+    update_cache: true

@@ -1,0 +1,65 @@
+---
+- name: configure | Ensure the PHP-FPM group exists
+  ansible.builtin.group:
+    name: "{{ php_fpm_group }}"
+    state: present
+
+- name: configure | Ensure the system users are part of the PHP-FPM system user group
+  ansible.builtin.user:
+    name: __user__
+    group: "{{ php_fpm_group }}"
+    append: true
+  loop: "{{ php_fpm_system_users }}"
+  loop_control:
+    loop_var: __user__
+
+- name: configure | Ensure that the required directories exist
+  block:
+    - name: configure | Ensure that the PHP-FPM configuration directory exists
+      ansible.builtin.file:
+        path: "{{ __php_fpm_conf_dir }}"
+        state: directory
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_group }}"
+        mode: 0644
+
+    - name: configure | Ensure that PHP-FPM logging directory exists
+      ansible.builtin.file:
+        path: "{{ __php_fpm_log_dir }}"
+        state: directory
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_group }}"
+        mode: 0644
+
+- name: configure | Configure PHP-FPM
+  ansible.builtin.template:
+    src: php-fpm.conf.j2
+    dest: "{{ __php_fpm_conf_dir }}/php-fpm.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart php_fpm
+
+- name: configure | Copy PHP Command-Line Interface configuration to PHP-FPM
+  ansible.builtin.copy:
+    src: "{{ __php_cli_conf_dir }}/php.ini"
+    remote_src: true
+    dest: "{{ __php_fpm_conf_dir }}/php.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart php_fpm
+  when:
+    - php_fpm_copy_cli_ini
+
+- name: configure | Configure PHP-FPM worker pool
+  ansible.builtin.template:
+    src: www.conf.j2
+    dest: "{{ __php_fpm_conf_dir }}/pool.d/www.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart php_fpm

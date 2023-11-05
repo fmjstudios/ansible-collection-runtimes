@@ -1,0 +1,67 @@
+---
+# The source for the PHP package - either 'ppa' or 'os' to use either the Ubuntu
+# PPA or the default operating system repositories
+php_package_source: ppa
+
+## The PHP version to use for the installation - defaults to 8.1
+php_version: "8.1"
+
+# PHP's dependencies - packages that PHP or one of its' extensions requires to
+# properly run
+php_dependencies:
+  []
+  # - mysql-client
+
+# PHP's extensions - PHP extensions not included with the default PHP binary
+# These will be installed manually
+php_extensions:
+  []
+  # - cli
+  # - common
+  # - mysql
+
+# php.ini configuration settings
+php_ini_general_engine: "On"
+php_ini_general_zend_enable_gc: "On"
+php_ini_general_zend_exception_ignore_args: "On"
+php_ini_general_zend_exception_string_param_max_len: 0
+
+php_ini_misc_expose_php: "Off"
+
+php_ini_resources_max_execution_time: 60
+php_ini_resources_max_input_time: 60
+php_ini_resources_memory_limit: 512M
+
+php_ini_errors_error_reporting: "E_ALL & ~E_DEPRECATED & ~E_STRICT"
+php_ini_errors_display_errors: "Off"
+php_ini_errors_display_startup_errors: "Off"
+php_ini_errors_log_errors: "On"
+php_ini_errors_error_log: "/var/log/php/php_cli.log"
+php_ini_errors_ignore_repeated_errors: "Off"
+php_ini_errors_ignore_repeated_source: "Off"
+php_ini_errors_report_memleaks: "On"
+
+php_ini_data_default_mimetype: "text/html"
+php_ini_data_default_charset: "UTF-8"
+
+php_ini_uploads_file_uploads: "On"
+php_ini_uploads_upload_max_filesize: 6M
+php_ini_uploads_max_file_uploads: 20
+
+php_ini_fopen_allow_url_fopen: "On"
+php_ini_fopen_allow_url_include: "Off"
+php_ini_fopen_default_socket_timeout: 60
+
+php_ini_date_timezone: "UTC"
+
+php_ini_enabled_extensions:
+  []
+  #  - curl
+  #  - gd
+  #  - mbstring
+  #  - pdo_mysql
+  #  - apcu
+
+php_ini_enabled_zend_extensions:
+  []
+  #  - opcache

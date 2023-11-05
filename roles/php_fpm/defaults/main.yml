@@ -1,0 +1,75 @@
+---
+## The PHP-FPM version to use for the installation - defaults to 8.1
+php_fpm_version: 8.1
+php_fpm_copy_cli_ini: false
+
+php_fpm_user: "www-data"
+php_fpm_group: "www-data"
+php_fpm_system_users:
+  []
+  # - ar
+
+## The PHP-FPM configuration file variables
+php_fpm_conf_pid: /run/php/php8.1-fpm.pid
+php_fpm_conf_error_log: /var/log/php/php8.1-fpm.log
+php_fpm_conf_daemonize: yes
+
+php_fpm_conf_events_mechanism: epoll
+php_fpm_conf_systemd_interval: 10
+
+php_fpm_conf_syslog_facility: daemon
+php_fpm_conf_syslog_ident: php-fpm
+
+php_fpm_conf_log_level: notice
+php_fpm_conf_log_limit: 1024
+php_fpm_conf_log_buffering: yes
+
+php_fpm_conf_emergency_restart_threshold: 10
+php_fpm_conf_emergency_restart_interval: 15
+
+php_fpm_conf_process_control_timeout: 0
+php_fpm_conf_process_max: 0
+
+php_fpm_conf_rlimit_files: 1024
+php_fpm_conf_rlimit_core: 0
+
+## The PHP-FPM worker pool 'www.conf' configuration file
+php_fpm_pool_conf_general_prefix: /run/php
+php_fpm_pool_conf_general_user: "{{ php_fpm_user }}"
+php_fpm_pool_conf_general_group: "{{ php_fpm_user }}"
+
+php_fpm_pool_conf_listener_path: /run/php/php8.1-fpm.sock
+php_fpm_pool_conf_listener_owner: "{{ php_fpm_user }}"
+php_fpm_pool_conf_listener_group: "{{ php_fpm_user }}"
+php_fpm_pool_conf_listener_mode: "0660"
+
+php_fpm_pool_conf_process_priority: "-19"
+php_fpm_pool_conf_process_dumpable: no
+
+php_fpm_pool_conf_process_manager_setting: dynamic
+php_fpm_pool_conf_process_manager_max_children: 5
+php_fpm_pool_conf_process_manager_start_servers: 2
+php_fpm_pool_conf_process_manager_min_spare_servers: 1
+php_fpm_pool_conf_process_manager_max_spare_servers: 3
+php_fpm_pool_conf_process_manager_max_spawn_rate: 32
+php_fpm_pool_conf_process_manager_process_idle_timeout: 10s
+php_fpm_pool_conf_process_manager_max_requests: 500
+
+php_fpm_pool_conf_process_manager_status_path: ""
+php_fpm_pool_conf_process_manager_status_listen: ""
+
+php_fpm_pool_conf_access_log: "/var/log/php/php8.1-fpm_$pool.access.log"
+php_fpm_pool_conf_access_log_format: '%R - %u %t "%m %r%Q%q" %s %f %{milli}d %{kilo}M %C%%'
+
+php_fpm_pool_conf_php_flags:
+  {}
+  # display_errors = "off"
+
+php_fpm_pool_conf_php_admin_flags:
+  {}
+  # log_errors = "on"
+
+php_fpm_pool_conf_php_admin_values:
+  {}
+  # memory_limit: 32M
+  # allow_url_fopen: "off"

@@ -1,0 +1,18 @@
+---
+- name: configure | Ensure that the required directories exist
+  block:
+    - name: configure | Ensure that the PHP CLI logging directory exists
+      ansible.builtin.file:
+        path: "{{ php_ini_errors_error_log | dirname }}"
+        state: directory
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_group }}"
+        mode: 0644
+
+- name: configure | Configure 'php.ini' for PHP Command-Line Interface
+  ansible.builtin.template:
+    src: php.ini.j2
+    dest: "/etc/php/{{ php_version }}/cli/php.ini"
+    owner: root
+    group: root
+    mode: 0644

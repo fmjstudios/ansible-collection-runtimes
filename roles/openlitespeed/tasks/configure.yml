@@ -1,0 +1,78 @@
+---
+- name: configure | Setup the OpenLiteSpeed web server configuration
+  ansible.builtin.template:
+    src: httpd_config.conf.j2
+    dest: /usr/local/lsws/conf/httpd_config.conf
+    mode: 0755
+    owner: lsadm
+    group: lsadm
+  notify:
+    - restart lsws
+
+- name: configure | Create new user to handle web server administration tasks
+  ansible.builtin.user:
+    name: "{{ __host__.user }}"
+    state: present
+    create_home: true
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __host__
+
+- name: configure | Create directories for the virtual hosts
+  ansible.builtin.file:
+    path: "/home/{{ __host__.user }}/webapps/{{ __host__.domain }}/html"
+    state: directory
+    owner: "{{ __host__.user }}"
+    group: "{{ __host__.user }}"
+    mode: 0755
+  register: vhosts_dir
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __host__
+
+- name: configure | Create log directories for the virtual hosts
+  ansible.builtin.file:
+    path: "{{ __host__.root }}/log"
+    state: directory
+    owner: "{{ __host__.user }}"
+    group: "{{ __host__.user }}"
+    mode: 0755
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __host__
+
+- name: configure | Create virtual host configuration directory
+  ansible.builtin.file:
+    path: "{{ ols_install_path }}/conf/vhosts/{{ __host__.domain }}"
+    state: directory
+    owner: lsadm
+    group: lsadm
+    mode: 0755
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __host__
+
+- name: configure | Create the virtual host configuration
+  ansible.builtin.template:
+    src: ./vhosts/vhconf.conf.j2
+    dest: "{{ ols_install_path }}/conf/vhosts/{{ __host__.domain }}/vhconf.conf"
+    owner: lsadm
+    group: lsadm
+    mode: 0755
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __host__
+
+- name: configure | Copy the generated admin password file to the control node
+  ansible.builtin.fetch:
+    src: /usr/local/lsws/adminpasswd
+    dest: "./tmp/adminpasswd-{{ inventory_hostname }}"
+    flat: true
+
+- name: configure | Restart and enable the OpenLiteSpeed WebServer to activate the management backend
+  ansible.builtin.service:
+    name: "{{ ols_service_name }}"
+    state: restarted
+    enabled: true
+  notify:
+    - restart lsws

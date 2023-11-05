@@ -1,0 +1,67 @@
+---
+- name: Install dependencies
+  become: true
+  ansible.builtin.apt:
+    name: "{{ __php__ }}"
+    state: present
+    update_cache: true
+  loop: "{{ php.dependencies }}"
+  loop_control:
+    loop_var: __php__
+  when:
+    - php.dependencies is defined
+
+- name: Add php ppa repositories
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "{{ __php__ }}"
+  loop: "{{ php.repositories.ppa }}"
+  loop_control:
+    loop_var: __php__
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install php packages
+  become: true
+  ansible.builtin.apt:
+    name: "php{{ php.version }}-{{ __php__ }}"
+    state: present
+  loop: "{{ php.packages }}"
+  loop_control:
+    loop_var: __php__
+  notify: Restart php-fpm
+
+- name: Configure php.ini for CLI
+  ansible.builtin.template:
+    src: php.ini.j2
+    dest: "/etc/php/{{ php.version }}/cli/php.ini"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure PHP-FPM pool
+  ansible.builtin.template:
+    src: www.conf.j2
+    dest: "/etc/php/{{ php.version }}/fpm/pool.d/www.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - php.install_fpm
+
+- name: Configure php.ini for FPM
+  ansible.builtin.template:
+    src: php.ini.j2
+    dest: "/etc/php/{{ php.version }}/fpm/php.ini"
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - php.install_fpm
+
+- name: Enable and restart the systemd PHP FPM service
+  ansible.builtin.service:
+    name: "php{{ php.version }}-fpm"
+    state: started
+    enabled: true
+  when:
+    - php.install_fpm

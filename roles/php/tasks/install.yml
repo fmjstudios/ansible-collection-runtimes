@@ -1,0 +1,44 @@
+---
+- name: install | Install internal PHP dependencies
+  ansible.builtin.apt:
+    name: "{{ __int_dep__ }}"
+    state: present
+  loop: "{{ __php_internal_dependencies }}"
+  loop_control:
+    loop_var: __int_dep__
+
+- name: install | Install PHP dependencies
+  ansible.builtin.apt:
+    name: "{{ __dep__ }}"
+    state: present
+  loop: "{{ php_dependencies }}"
+  loop_control:
+    loop_var: __dep__
+
+- name: install | Add Ubuntu's PPA repositories if configured as package source
+  ansible.builtin.apt_repository:
+    repo: "{{ __php_repository_ppa }}"
+    state: present
+  when:
+    - php_package_source == "ppa"
+
+- name: install | Update system package caches after configuring third-party repositories
+  ansible.builtin.apt:
+    update_cache: true
+  when:
+    - php_package_source == "ppa"
+
+- name: install | Install PHP package from configured package source
+  ansible.builtin.apt:
+    name: "php{{ php_version }}"
+    state: present
+    install_recommends: true
+
+- name: install | Install PHP extension packages from configured package source
+  ansible.builtin.apt:
+    name: "php{{ php_version }}-{{ __ext__ }}"
+    state: present
+    install_recommends: true
+  loop: "{{ php_extensions }}"
+  loop_control:
+    loop_var: __ext__

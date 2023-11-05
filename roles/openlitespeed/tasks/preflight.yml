@@ -1,0 +1,100 @@
+---
+- name: preflight | Assert use of Ubuntu 22.04 as the base OS
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+      - ansible_os_family == "Debian"
+      - ansible_distribution_major_version == "22"
+    fail_msg: "This role is only compatible with Ubuntu 22.04 (Jammy)"
+
+- name: preflight | Assert usage of systemd as an init system
+  ansible.builtin.assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: preflight | Install package fact dependencies
+  become: true
+  ansible.builtin.package:
+    name: "{{ _pkg_fact_req }}"
+    state: present
+  when: (_pkg_fact_req)
+  vars:
+    _pkg_fact_req: "{% if (ansible_pkg_mgr == 'apt') %}\
+      {{ ('python-apt' if ansible_python_version is version('3', '<') else 'python3-apt') }}
+      {% else %}\
+      {% endif %}"
+
+- name: preflight | Gather package facts
+  ansible.builtin.package_facts:
+  when: "not 'packages' in ansible_facts"
+
+- name: preflight | Assert that the OpenLiteSpeed Web Admin configuration is correct
+  ansible.builtin.assert:
+    that:
+      - ols_version is defined
+      - ols_version is string
+      - ols_repo is defined
+      - ols_repo is string
+      - ols_package is defined
+      - ols_package is string
+      - ols_service_name is defined
+      - ols_service_name is string
+      - ols_install_path is defined
+      - ols_install_path is string
+
+- name: preflight | Assert that the OpenLiteSpeed Web Server configuration is correct
+  ansible.builtin.assert:
+    that:
+      - ols_config_listen_addr is defined
+      - ols_config_listen_addr is string
+      - ols_config_http_port is defined
+      - ols_config_http_port is number
+      - ols_config_http_port > 0
+      - ols_config_https_port is defined
+      - ols_config_https_port is number
+      - ols_config_https_port > 0
+      - ols_config_admin_emails is defined
+      - ols_config_admin_emails is iterable
+      - ols_config_admin_emails | length > 0
+      - ols_config_log_level is defined
+      - ols_config_log_level is string
+
+- name: preflight | Assert that the OpenLiteSpeed virtual host configuration is correct
+  ansible.builtin.assert:
+    that:
+      - __vhost__.domain is defined
+      - __vhost__.domain is string
+      - __vhost__.root is defined
+      - __vhost__.root is string
+      - __vhost__.aliases is defined
+      - __vhost__.aliases is iterable
+      - __vhost__.aliases | length > 0
+      - __vhost__.ssl_certificate is defined
+      - __vhost__.ssl_certificate is string
+      - __vhost__.ssl_key is defined
+      - __vhost__.ssl_key is string
+      - __vhost__.user is defined
+      - __vhost__.user is string
+      - __vhost__.group is defined
+      - __vhost__.group is string
+      - __vhost__.admin_email is defined
+      - __vhost__.admin_email is string
+  loop: "{{ ols_config_virtual_hosts }}"
+  loop_control:
+    loop_var: __vhost__
+  when:
+    - ols_config_virtual_hosts is defined
+    - ols_config_virtual_hosts is iterable
+    - ols_config_virtual_hosts | length > 0
+
+- name: preflight | Assert that the OpenLiteSpeed-PHP configuration is correct
+  ansible.builtin.assert:
+    that:
+      - ols_php_version is defined
+      - ols_php_version is string
+      - ols_php_dependencies is defined
+      - ols_php_dependencies is iterable
+      - ols_php_dependencies | length > 0
+      - ols_php_extensions is defined
+      - ols_php_extensions is iterable
+      - ols_php_extensions | length > 0
